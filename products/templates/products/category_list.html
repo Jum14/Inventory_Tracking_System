@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-success">Product Categories</h2>
+    {% if user.is_superuser %}
+    <a href="/admin/products/category/add/" class="btn btn-success btn-sm">
+        <i class="bi bi-plus-lg"></i> Add Category
+    </a>
+    {% endif %}
+</div>
+
+<div class="row g-3">
+    {% for cat in categories %}
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'product_list' %}?category={{ cat.id }}" class="text-decoration-none text-dark">
+            <div class="card shadow-sm border-0 h-100 category-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-{{ cat.color_theme|default:'success' }} bg-opacity-10 p-2 rounded me-3">
+                            <i class="bi {{ cat.icon|default:'bi-tag-fill' }} text-{{ cat.color_theme|default:'success' }} fs-4"></i>
+                        </div>
+                        <h5 class="card-title mb-0 fw-bold">{{ cat.name }}</h5>
+                    </div>
+                    <p class="card-text text-muted small">
+                        {{ cat.description|default:"No description provided." }}
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                    <span class="badge bg-light text-dark border">
+                        {{ cat.products.count }} Products
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <p class="text-muted">No categories found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    /* Hover effect to make it feel clickable */
+    .category-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .category-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+</style>
+{% endblock %}

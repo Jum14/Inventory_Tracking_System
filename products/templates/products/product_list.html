@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-success">Inventory Items</h2>
+        {% if user.is_superuser %}
+        <a href="{% url 'product_create' %}" class="btn btn-success shadow-sm"><i class="bi bi-plus-lg"></i> Add Product</a>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 p-3">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0" 
+                           placeholder="Search SKU or Name..."
+                           hx-get="{% url 'product_list' %}"
+                           hx-trigger="keyup changed delay:300ms"
+                           hx-target="#product-table-body"
+                           hx-include="[name='category'], [name='sort']">
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="btn-group btn-group-sm">
+                    <button hx-get="{% url 'product_list' %}?category=all" hx-target="#product-table-body" class="btn btn-outline-secondary">All</button>
+                    {% for cat in categories %}
+                    <button hx-get="{% url 'product_list' %}?category={{ cat.id }}" 
+                            hx-target="#product-table-body" 
+                            class="btn btn-outline-{{ cat.color_theme }}">
+                        <i class="bi {{ cat.icon }}"></i> {{ cat.name }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <select name="sort" class="form-select form-select-sm" hx-get="{% url 'product_list' %}" hx-target="#product-table-body">
+                    <option value="-date_added">Newest First</option>
+                    <option value="name">Name (A-Z)</option>
+                    <option value="current_stock">Lowest Stock</option>
+                    <option value="-unit_price">Price (High-Low)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted">
+                    <tr>
+                        <th class="ps-3">Product Info</th>
+                        <th>Category</th>
+                        <th>Stock Level</th>
+                        <th>Price</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="product-table-body">
+                    {% include 'products/partials/product_table.html' %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

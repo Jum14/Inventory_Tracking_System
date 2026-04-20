@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-success">Inventory Dashboard</h2>
+        <span class="text-muted">{{ today|date:"F d, Y" }}</span>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card card-kpi bg-primary text-white border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase opacity-75 small">Total Products</h6>
+                    <h2 class="fw-bold mb-0">{{ total_products }}</h2>
+                    <i class="bi bi-box-seam position-absolute top-50 end-0 translate-middle-y me-3 opacity-25 fs-1"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-kpi bg-success text-white border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase opacity-75 small">Total Categories</h6>
+                    <h2 class="fw-bold mb-0">{{ total_categories }}</h2>
+                    <i class="bi bi-tags position-absolute top-50 end-0 translate-middle-y me-3 opacity-25 fs-1"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-kpi bg-info text-white border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase opacity-75 small">Suppliers</h6>
+                    <h2 class="fw-bold mb-0">{{ total_suppliers }}</h2>
+                    <i class="bi bi-truck position-absolute top-50 end-0 translate-middle-y me-3 opacity-25 fs-1"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-kpi bg-warning text-dark border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase opacity-75 small">Total Users</h6>
+                    <h2 class="fw-bold mb-0">{{ total_users }}</h2>
+                    <i class="bi bi-people position-absolute top-50 end-0 translate-middle-y me-3 opacity-25 fs-1"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3 text-muted small text-uppercase">Stock by Category</h5>
+                    <div style="max-height: 300px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3 text-muted small text-uppercase">Low Stock Watchlist</h5>
+                    <div style="height: 300px;">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">Recently Added Products</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Stock</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td class="fw-bold">{{ p.name }}</td>
+                        <td class="text-muted small">{{ p.sku }}</td>
+                        <td>
+                            <span class="badge {% if p.current_stock <= p.min_stock_level %}bg-danger{% else %}bg-light text-dark{% endif %}">
+                                {{ p.current_stock }}
+                            </span>
+                        </td>
+                        <td>${{ p.unit_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Pie Chart
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                data: {{ category_data|safe }},
+                backgroundColor: ['#28a745', '#007bff', '#ffc107', '#17a2b8', '#6c757d'],
+                hoverOffset: 10
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } } 
+        }
+    });
+
+    // Bar Chart
+    new Chart(document.getElementById('stockChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ product_labels|safe }},
+            datasets: [
+                {
+                    label: 'Current Stock',
+                    data: {{ product_stock|safe }},
+                    backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                    borderRadius: 5
+                },
+                {
+                    label: 'Min Level',
+                    data: {{ product_min|safe }},
+                    backgroundColor: 'rgba(220, 53, 69, 0.5)',
+                    borderRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-success">Inventory Transactions</h2>
+    <span class="badge bg-light text-dark border">Automated Log System</span>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Date & Time</th>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Handled By</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td class="ps-3">{{ t.timestamp|date:"M d, Y H:i" }}</td>
+                    <td class="fw-bold">{{ t.product.name }}</td>
+                    <td>
+                        {% if t.transaction_type == 'IN' %}
+                            <span class="badge bg-success">Stock In</span>
+                        {% else %}
+                            <span class="badge bg-danger">Stock Out</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ t.quantity }}</td>
+                    <td>
+                        <span class="badge bg-info text-dark">{{ t.get_status_display }}</span>
+                    </td>
+                    <td>
+                        <small class="text-muted">
+                            <i class="bi bi-person"></i> {{ t.handled_by.username|default:"System" }}
+                        </small>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ t.remarks|default:"---" }}</small>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        No automated transactions recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
